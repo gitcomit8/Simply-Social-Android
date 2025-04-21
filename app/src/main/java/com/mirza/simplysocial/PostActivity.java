@@ -1,6 +1,7 @@
 package com.mirza.simplysocial;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -35,22 +36,29 @@ public class PostActivity extends AppCompatActivity {
         buttonCreatePost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final String filePath = editTextFilePath.getText().toString();
-                final String loggedInUsername = "test";
-
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        final String filePath = editTextFilePath.getText().toString();
+
+                        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+                        String sessionToken = sharedPreferences.getString("session_token", null);
+
+                        if (sessionToken == null) {
+                            runOnUiThread(() -> Toast.makeText(PostActivity.this, "Not logged in!", Toast.LENGTH_SHORT).show());
+                            return;
+                        }
+
                         try {
                             JSONObject jsonInputString = new JSONObject();
                             jsonInputString.put("mediaFile", filePath);
-                            jsonInputString.put("username", loggedInUsername);
 
-                            URL url = new URL("http://ideapad.tail50fddd.ts.net:8080/api/posts/create");
+                            URL url = new URL("http://YOUR_BACKEND_IP:8080/api/posts/create");
                             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                             connection.setRequestMethod("POST");
                             connection.setRequestProperty("Content-Type", "application/json; utf-8");
                             connection.setRequestProperty("Accept", "application/json");
+                            connection.setRequestProperty("Authorization", sessionToken); // Add the header
                             connection.setDoOutput(true);
 
                             try (OutputStream os = connection.getOutputStream()) {

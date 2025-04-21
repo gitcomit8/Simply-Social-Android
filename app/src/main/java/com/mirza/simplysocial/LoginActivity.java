@@ -1,6 +1,7 @@
 package com.mirza.simplysocial;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -82,8 +83,13 @@ public class LoginActivity extends AppCompatActivity {
                                     String message = jsonResponse.getString("message");
                                     Toast.makeText(LoginActivity.this,message,Toast.LENGTH_LONG).show();
                                     if(success){
+                                        String sessionToken=jsonResponse.getString("sessionToken");
+                                        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs",MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                                        editor.putString("session_token",sessionToken);
+                                        editor.apply();
+                                        Toast.makeText(LoginActivity.this, "Login Successful! Token: "+sessionToken, Toast.LENGTH_LONG).show();
                                         //TODO: Navigate to main feed activity
-                                        Toast.makeText(LoginActivity.this, "Login Successful!", Toast.LENGTH_LONG).show();
                                     }
                                 } catch (Exception e) {
                                     Log.e("LoginActivity", "Error parsing JSON response",e);
